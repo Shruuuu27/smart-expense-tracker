@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import os
 from pathlib import Path
 
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request, send_from_directory, url_for
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -254,6 +254,16 @@ def build_state() -> dict[str, object]:
 @app.get("/")
 def index():
     return render_template("index.html", **build_state())
+
+
+@app.get("/manifest.webmanifest")
+def manifest():
+    return send_from_directory(BASE_DIR / "static", "manifest.webmanifest", mimetype="application/manifest+json")
+
+
+@app.get("/sw.js")
+def service_worker():
+    return send_from_directory(BASE_DIR / "static", "sw.js", mimetype="application/javascript")
 
 
 @app.post("/users")

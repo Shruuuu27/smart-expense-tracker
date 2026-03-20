@@ -1,0 +1,17 @@
+{
+  "name": "Smart Expense Tracker",
+  "short_name": "ExpenseOS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#081018",
+  "theme_color": "#081018",
+  "description": "Track expenses, review trends, and manage multiple users from your phone or desktop.",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
