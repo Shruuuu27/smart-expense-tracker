@@ -19,24 +19,29 @@
     <main class="page-shell">
       <section class="top-strip">
         <div class="brand-pill">ExpenseOS</div>
-        <div class="meta-pill">Responsive Python Dashboard</div>
+        <div class="top-strip-actions">
+          <div class="meta-pill">{{ current_user.username }}</div>
+          <form method="post" action="{{ url_for('logout') }}">
+            <button class="ghost-button" type="submit">Log Out</button>
+          </form>
+        </div>
       </section>
 
       <section class="hero">
         <div class="hero-copy-wrap">
           <p class="eyebrow">Mobile Ready</p>
           <h1>Smart Expense Tracker</h1>
-          <p class="hero-copy">A responsive Python expense tracker that feels native on phones, polished on desktop, and structured for future hosting. Manage multiple users, track daily spending, and review trends without fighting the interface.</p>
+          <p class="hero-copy">A responsive personal expense tracker that feels native on phones, polished on desktop, and gives each logged-in user access only to their own records and trends.</p>
           <div class="hero-actions">
+            <span class="action-chip">Private access</span>
             <span class="action-chip">Fast filters</span>
-            <span class="action-chip">Multi-user records</span>
-            <span class="action-chip">Ready for web hosting</span>
+            <span class="action-chip">Ready for phone install</span>
           </div>
         </div>
         <div class="hero-side-card">
           <p class="eyebrow">Current View</p>
           <h2>{{ summary.count }} expense{{ '' if summary.count == 1 else 's' }}</h2>
-          <p>Focused on {% if selected_user == 'all' %}all users{% else %}one user{% endif %} with the <strong>{{ preset }}</strong> range.</p>
+          <p>Signed in as <strong>{{ current_user.username }}</strong> with the <strong>{{ preset }}</strong> range active.</p>
           <div class="mini-stats">
             <div>
               <span>Spend</span>
@@ -81,28 +86,15 @@
           <div class="panel-head">
             <div>
               <p class="eyebrow">Manage</p>
-              <h2>Users & Expenses</h2>
+              <h2>Your Expenses</h2>
             </div>
             <span class="panel-tag">Write</span>
           </div>
 
-          <form class="stack-form" method="post" action="{{ url_for('create_user') }}">
-            <label for="username">Create User</label>
-            <div class="inline-form">
-              <input id="username" name="username" type="text" placeholder="Enter user name">
-              <button type="submit">Add User</button>
-            </div>
-          </form>
+          <div class="owner-chip">Logged in as {{ current_user.username }}</div>
 
           <form class="stack-form" method="post" action="{{ url_for('save_expense') }}">
             <input type="hidden" name="expense_id" value="">
-            <label for="user_id">Expense User</label>
-            <select id="user_id" name="user_id" required>
-              {% for user in users %}
-                <option value="{{ user.id }}" {% if selected_user == user.id|string %}selected{% endif %}>{{ user.username }}</option>
-              {% endfor %}
-            </select>
-
             <label for="expense_date">Date</label>
             <input id="expense_date" name="expense_date" type="date" value="{{ request.args.get('expense_date', '') or '' }}" required>
 
@@ -130,26 +122,17 @@
           <div class="panel-head">
             <div>
               <p class="eyebrow">Analysis</p>
-              <h2>Mobile-Friendly Dashboard</h2>
+              <h2>Your Dashboard</h2>
             </div>
             <span class="panel-tag">Insights</span>
           </div>
 
           <div class="focus-ribbon">
-            <span>Viewing: {{ selected_user_name }}</span>
+            <span>Viewing: {{ current_user.username }}</span>
             <span>Range: {{ preset }}</span>
           </div>
 
           <form class="filter-grid" method="get" action="{{ url_for('index') }}">
-            <div>
-              <label for="user">User</label>
-              <select id="user" name="user">
-                <option value="all" {% if selected_user == 'all' %}selected{% endif %}>All Users</option>
-                {% for user in users %}
-                  <option value="{{ user.id }}" {% if selected_user == user.id|string %}selected{% endif %}>{{ user.username }}</option>
-                {% endfor %}
-              </select>
-            </div>
             <div>
               <label for="preset">Range</label>
               <select id="preset" name="preset">
@@ -215,7 +198,6 @@
               <table>
                 <thead>
                   <tr>
-                    <th>User</th>
                     <th>Date</th>
                     <th>Title</th>
                     <th>Category</th>
@@ -227,7 +209,6 @@
                 <tbody>
                   {% for expense in expenses %}
                     <tr>
-                      <td data-label="User">{{ expense.username }}</td>
                       <td data-label="Date">{{ expense.expense_date }}</td>
                       <td data-label="Title">{{ expense.title }}</td>
                       <td data-label="Category">{{ expense.category }}</td>
@@ -241,7 +222,7 @@
                     </tr>
                   {% else %}
                     <tr>
-                      <td colspan="7" class="empty-row">No expenses found for this filter.</td>
+                      <td colspan="6" class="empty-row">No expenses found for this filter.</td>
                     </tr>
                   {% endfor %}
                 </tbody>

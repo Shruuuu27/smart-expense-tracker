@@ -40,6 +40,7 @@ python app.py
 - Dates must use `YYYY-MM-DD`
 - Existing old records are automatically assigned to `User 1`
 - The web app is the better path if you want mobile support and future free hosting
+- The app now supports `DATABASE_URL`, so it can use a permanent hosted Postgres database instead of local SQLite
 
 ## Free Hosting On Render
 
@@ -58,4 +59,21 @@ This project is now prepared for free Render deployment with `render.yaml`.
 
 - Render free web services spin down after 15 minutes of inactivity
 - Render free web services use an ephemeral filesystem, so local SQLite data can be lost on restart or redeploy
-- For real persistent hosted data, move from local `expenses.db` to a hosted database later
+- For real persistent hosted data, set `DATABASE_URL` to a hosted Postgres connection string such as Supabase
+
+## Permanent Database With Supabase
+
+1. Create a free project on Supabase
+2. Open `Project Settings` -> `Database`
+3. Copy a Postgres connection string
+4. In Render, open your web service -> `Environment`
+5. Add:
+
+```text
+DATABASE_URL=your_supabase_postgres_connection_string
+SECRET_KEY=choose_a_random_secret_string
+```
+
+6. Save changes and redeploy
+
+After that, your hosted app will use the permanent online database instead of local `expenses.db`

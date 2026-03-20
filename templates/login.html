@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login | Smart Expense Tracker</title>
+    <meta name="theme-color" content="#081018">
+    <link rel="manifest" href="{{ url_for('manifest') }}">
+    <link rel="icon" href="{{ url_for('static', filename='icon.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <main class="auth-shell">
+      <section class="auth-card">
+        <p class="eyebrow">Personal Access</p>
+        <h1>ExpenseOS Login</h1>
+        <p class="hero-copy">Sign in with your user name to access only your own expenses, or create a new account to start a personal expense history.</p>
+
+        {% if error %}
+          <div class="banner error">{{ error }}</div>
+        {% endif %}
+        {% if message %}
+          <div class="banner success">{{ message }}</div>
+        {% endif %}
+
+        <div class="auth-grid">
+          <form class="stack-form" method="post" action="{{ url_for('login_submit') }}">
+            <h2>Log In</h2>
+            <label for="login-username">Username</label>
+            <input id="login-username" name="username" type="text" placeholder="Enter your username" required>
+            <button class="primary-button" type="submit">Log In</button>
+          </form>
+
+          <form class="stack-form" method="post" action="{{ url_for('create_user') }}">
+            <h2>Create Account</h2>
+            <label for="signup-username">New Username</label>
+            <input id="signup-username" name="username" type="text" placeholder="Choose a username" required>
+            <button class="secondary-button" type="submit">Create Account</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
