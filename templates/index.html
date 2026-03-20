@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Smart Expense Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <main class="page-shell">
+      <section class="top-strip">
+        <div class="brand-pill">ExpenseOS</div>
+        <div class="meta-pill">Responsive Python Dashboard</div>
+      </section>
+
+      <section class="hero">
+        <div class="hero-copy-wrap">
+          <p class="eyebrow">Mobile Ready</p>
+          <h1>Smart Expense Tracker</h1>
+          <p class="hero-copy">A responsive Python expense tracker that feels native on phones, polished on desktop, and structured for future hosting. Manage multiple users, track daily spending, and review trends without fighting the interface.</p>
+          <div class="hero-actions">
+            <span class="action-chip">Fast filters</span>
+            <span class="action-chip">Multi-user records</span>
+            <span class="action-chip">Ready for web hosting</span>
+          </div>
+        </div>
+        <div class="hero-side-card">
+          <p class="eyebrow">Current View</p>
+          <h2>{{ summary.count }} expense{{ '' if summary.count == 1 else 's' }}</h2>
+          <p>Focused on {% if selected_user == 'all' %}all users{% else %}one user{% endif %} with the <strong>{{ preset }}</strong> range.</p>
+          <div class="mini-stats">
+            <div>
+              <span>Spend</span>
+              <strong>Rs {{ '%.0f'|format(summary.total) }}</strong>
+            </div>
+            <div>
+              <span>Category</span>
+              <strong>{{ summary.top_category }}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {% if error %}
+        <div class="banner error">{{ error }}</div>
+      {% endif %}
+      {% if message %}
+        <div class="banner success">{{ message }}</div>
+      {% endif %}
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span>Total Spend</span>
+          <strong>Rs {{ '%.2f'|format(summary.total) }}</strong>
+        </article>
+        <article class="stat-card">
+          <span>Average Expense</span>
+          <strong>Rs {{ '%.2f'|format(summary.average) }}</strong>
+        </article>
+        <article class="stat-card">
+          <span>Transactions</span>
+          <strong>{{ summary.count }}</strong>
+        </article>
+        <article class="stat-card">
+          <span>Top Category</span>
+          <strong>{{ summary.top_category }}</strong>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Manage</p>
+              <h2>Users & Expenses</h2>
+            </div>
+            <span class="panel-tag">Write</span>
+          </div>
+
+          <form class="stack-form" method="post" action="{{ url_for('create_user') }}">
+            <label for="username">Create User</label>
+            <div class="inline-form">
+              <input id="username" name="username" type="text" placeholder="Enter user name">
+              <button type="submit">Add User</button>
+            </div>
+          </form>
+
+          <form class="stack-form" method="post" action="{{ url_for('save_expense') }}">
+            <input type="hidden" name="expense_id" value="">
+            <label for="user_id">Expense User</label>
+            <select id="user_id" name="user_id" required>
+              {% for user in users %}
+                <option value="{{ user.id }}" {% if selected_user == user.id|string %}selected{% endif %}>{{ user.username }}</option>
+              {% endfor %}
+            </select>
+
+            <label for="expense_date">Date</label>
+            <input id="expense_date" name="expense_date" type="date" value="{{ request.args.get('expense_date', '') or '' }}" required>
+
+            <label for="title">Title</label>
+            <input id="title" name="title" type="text" placeholder="Lunch, Bus, Shoes" required>
+
+            <label for="category">Category</label>
+            <select id="category" name="category">
+              {% for category in categories %}
+                <option value="{{ category }}">{{ category }}</option>
+              {% endfor %}
+            </select>
+
+            <label for="amount">Amount</label>
+            <input id="amount" name="amount" type="number" step="0.01" min="0.01" placeholder="120" required>
+
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="Optional notes"></textarea>
+
+            <button class="primary-button" type="submit">Save Expense</button>
+          </form>
+        </article>
+
+        <article class="panel panel-wide">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Analysis</p>
+              <h2>Mobile-Friendly Dashboard</h2>
+            </div>
+            <span class="panel-tag">Insights</span>
+          </div>
+
+          <div class="focus-ribbon">
+            <span>Viewing: {{ selected_user_name }}</span>
+            <span>Range: {{ preset }}</span>
+          </div>
+
+          <form class="filter-grid" method="get" action="{{ url_for('index') }}">
+            <div>
+              <label for="user">User</label>
+              <select id="user" name="user">
+                <option value="all" {% if selected_user == 'all' %}selected{% endif %}>All Users</option>
+                {% for user in users %}
+                  <option value="{{ user.id }}" {% if selected_user == user.id|string %}selected{% endif %}>{{ user.username }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label for="preset">Range</label>
+              <select id="preset" name="preset">
+                {% for option in presets %}
+                  <option value="{{ option }}" {% if preset == option %}selected{% endif %}>{{ option }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label for="start">Start</label>
+              <input id="start" name="start" type="date" value="{{ start_date }}">
+            </div>
+            <div>
+              <label for="end">End</label>
+              <input id="end" name="end" type="date" value="{{ end_date }}">
+            </div>
+            <button class="secondary-button" type="submit">Apply Filters</button>
+          </form>
+
+          <section class="chart-panel">
+            <div class="chart-card">
+              <h3>Daily Spending</h3>
+              {% if summary.daily_totals %}
+                <div class="bars">
+                  {% for day, amount in summary.daily_totals.items() %}
+                    <div class="bar-item">
+                      <div class="bar-track">
+                        <span class="bar-fill" style="height: {{ ((amount / summary.chart_max) * 100) if summary.chart_max else 0 }}%"></span>
+                      </div>
+                      <small>{{ day[5:] }}</small>
+                      <strong>Rs {{ '%.0f'|format(amount) }}</strong>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="empty-state">No expense data in this date range yet.</p>
+              {% endif %}
+            </div>
+
+            <div class="chart-card">
+              <h3>Category Breakdown</h3>
+              {% if summary.category_totals %}
+                <ul class="category-list">
+                  {% for category, amount in summary.category_totals.items() %}
+                    <li>
+                      <span>{{ category }}</span>
+                      <strong>Rs {{ '%.2f'|format(amount) }}</strong>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="empty-state">Add a few expenses to see category totals.</p>
+              {% endif %}
+            </div>
+          </section>
+
+          <section class="table-wrap">
+            <div class="table-head">
+              <h3>Expense History</h3>
+              <span>{{ expenses|length }} record(s)</span>
+            </div>
+            <div class="responsive-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Notes</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for expense in expenses %}
+                    <tr>
+                      <td data-label="User">{{ expense.username }}</td>
+                      <td data-label="Date">{{ expense.expense_date }}</td>
+                      <td data-label="Title">{{ expense.title }}</td>
+                      <td data-label="Category">{{ expense.category }}</td>
+                      <td data-label="Amount">Rs {{ '%.2f'|format(expense.amount) }}</td>
+                      <td data-label="Notes">{{ expense.notes or '-' }}</td>
+                      <td data-label="Action">
+                        <form method="post" action="{{ url_for('delete_expense', expense_id=expense.id) }}">
+                          <button class="danger-button" type="submit">Delete</button>
+                        </form>
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr>
+                      <td colspan="7" class="empty-row">No expenses found for this filter.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
